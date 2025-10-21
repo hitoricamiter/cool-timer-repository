@@ -1,10 +1,14 @@
 package ru.zaikin.cooltimer
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.util.Log
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
@@ -110,4 +114,25 @@ class MainActivity : AppCompatActivity() {
         isTimerOn = false
     }
 
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        val menuInflater: MenuInflater = menuInflater
+        menuInflater.inflate(R.menu.timer_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id: Int = item.itemId
+
+        if (id == R.id.action_settings) {
+            val openSettings: Intent = Intent(this, SettingsActivity::class.java)
+            startActivity(openSettings)
+            return true
+        } else if (id == R.id.action_about){
+            val openAbout: Intent = Intent(this, AboutActivity::class.java)
+            startActivity(openAbout)
+            return true
+        }
+
+        return super.onOptionsItemSelected(item)
+    }
 }
