@@ -1,43 +1,113 @@
 package ru.zaikin.cooltimer
 
+import android.annotation.SuppressLint
+import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
-import android.os.Handler
 import android.util.Log
+import android.view.View
+import android.widget.Button
+import android.widget.SeekBar
+import android.widget.TextView
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
+
+
+    private lateinit var seekBar: SeekBar
+    private lateinit var text: TextView
+    private lateinit var button: Button
+
+    private var number: Long = 0
+    private var isTimerOn: Boolean = false
+    private lateinit var downTimer: CountDownTimer
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
 
-        var downTimer: CountDownTimer = object : CountDownTimer(10000, 1000) {
-            override fun onFinish() {
-                Log.d("Finish", "done")
+        seekBar = findViewById<SeekBar>(R.id.seekBar)
+        seekBar.max = 600
+        seekBar.progress = 30
+
+        text = findViewById<TextView>(R.id.textView2)
+        button = findViewById<Button>(R.id.button)
+
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+
+                val minutes: Long = (progress / 60).toLong()
+                val seconds: Long = progress - (minutes * 60)
+                updateTimer(minutes, seconds)
             }
 
-            override fun onTick(millisUntilFinished: Long) {
-                Log.d("Tick", "left $millisUntilFinished")
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {
+                // Можно использовать для действий, когда пользователь начал перемещать ползунок
             }
 
-        }
-
-        downTimer.start()
-
-        /*val handler: Handler = Handler()
-
-        val runnable = object : Runnable {
-            override fun run() {
-                handler.postDelayed(this, 2000)
-                Log.d("Runnable", "2 seconds passed")
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {
+                // Можно использовать для действий, когда пользователь отпустил ползунок
             }
-        }
-
-        handler.post(runnable)*/
+        })
 
 
     }
+
+    fun startTimer(view: View) {
+
+
+        if (!isTimerOn) {
+            button.text = "Stop"
+            seekBar.isEnabled = false
+            isTimerOn = true
+
+            downTimer =
+                object : CountDownTimer((seekBar.progress * 1000).toLong(), 1000) {
+                    override fun onFinish() {
+                        val player: MediaPlayer =
+                            MediaPlayer.create(applicationContext, R.raw.bell_sound)
+                        player.start()
+                        resetTimer()
+                    }
+
+                    override fun onTick(millisUntilFinished: Long) {
+                        val minutes: Long = millisUntilFinished / 60 / 1000
+                        val seconds: Long = millisUntilFinished / 1000 - (minutes * 60)
+                        updateTimer(minutes, seconds)
+                    }
+
+                }
+
+
+            downTimer.start()
+        } else {
+            resetTimer()
+        }
+
+
+    }
+
+    @SuppressLint("SetTextI18n")
+    private fun updateTimer(minutes: Long, seconds: Long) {
+        var minutesString: String = ""
+        var secondsString: String = ""
+
+        minutesString = if (minutes < 10) "0${minutes}" else "$minutes"
+        secondsString = if (seconds < 10) "0${seconds}" else "$seconds"
+
+        text.text = "$minutesString:$secondsString"
+    }
+
+    private fun resetTimer() {
+        downTimer.cancel()
+        text.text = "00:30"
+        button.text = "Start"
+        seekBar.isEnabled = true
+        seekBar.progress = 60
+        isTimerOn = false
+    }
+
 }
