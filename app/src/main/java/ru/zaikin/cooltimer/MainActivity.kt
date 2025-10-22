@@ -70,17 +70,35 @@ class MainActivity : AppCompatActivity() {
 
             downTimer =
                 object : CountDownTimer((seekBar.progress * 1000).toLong(), 1000) {
+
                     override fun onFinish() {
+
+
                         val sharedPref: SharedPreferences =
                             PreferenceManager.getDefaultSharedPreferences(applicationContext)
 
-
                         if (sharedPref.getBoolean("enable_sound", true)) {
-                            val player: MediaPlayer =
+
+                            val melodyName: String? = sharedPref.getString("timer_melody", "bell")
+                            var player: MediaPlayer =
                                 MediaPlayer.create(applicationContext, R.raw.bell_sound)
+
+                            if (melodyName.equals("bell")) {
+                                player =
+                                    MediaPlayer.create(applicationContext, R.raw.bell_sound)
+                            } else if (melodyName.equals("alarm siren")) {
+                                player =
+                                    MediaPlayer.create(applicationContext, R.raw.alarm_siren_sound)
+                            } else if (melodyName.equals("bip")) {
+                                player = MediaPlayer.create(applicationContext, R.raw.bip_sound)
+                            }
+
                             player.start()
-                            resetTimer()
+
+
                         }
+
+                        resetTimer()
                     }
 
                     override fun onTick(millisUntilFinished: Long) {
@@ -140,5 +158,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun setIntervalFromSharedPreferences(sharedPreferences: SharedPreferences) {
+
     }
 }
