@@ -2,6 +2,7 @@ package ru.zaikin.cooltimer
 
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.content.SharedPreferences
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.CountDownTimer
@@ -13,8 +14,8 @@ import android.view.View
 import android.widget.Button
 import android.widget.SeekBar
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.PreferenceManager
 
 class MainActivity : AppCompatActivity() {
 
@@ -29,7 +30,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
 
@@ -71,10 +71,16 @@ class MainActivity : AppCompatActivity() {
             downTimer =
                 object : CountDownTimer((seekBar.progress * 1000).toLong(), 1000) {
                     override fun onFinish() {
-                        val player: MediaPlayer =
-                            MediaPlayer.create(applicationContext, R.raw.bell_sound)
-                        player.start()
-                        resetTimer()
+                        val sharedPref: SharedPreferences =
+                            PreferenceManager.getDefaultSharedPreferences(applicationContext)
+
+
+                        if (sharedPref.getBoolean("enable_sound", true)) {
+                            val player: MediaPlayer =
+                                MediaPlayer.create(applicationContext, R.raw.bell_sound)
+                            player.start()
+                            resetTimer()
+                        }
                     }
 
                     override fun onTick(millisUntilFinished: Long) {
@@ -127,7 +133,7 @@ class MainActivity : AppCompatActivity() {
             val openSettings: Intent = Intent(this, SettingsActivity::class.java)
             startActivity(openSettings)
             return true
-        } else if (id == R.id.action_about){
+        } else if (id == R.id.action_about) {
             val openAbout: Intent = Intent(this, AboutActivity::class.java)
             startActivity(openAbout)
             return true
